@@ -57,7 +57,10 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 	// Handle different functions
 	if function == "init" {													//initialize the chaincode state, used as reset
 		return t.Init(stub, "init", args)
+	} else if function == "write" {
+		return t.write(stub, args)
 	}
+
 	fmt.Println("invoke did not find func: " + function)					//error
 
 	return nil, errors.New("Received unknown function invocation: " + function)
@@ -75,4 +78,27 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args 
 	fmt.Println("query did not find func: " + function)						//error
 
 	return nil, errors.New("Received unknown function query: " + function)
+}
+
+
+// The write function which is being used by the Invoke function ======================
+func (t *SimpleChaincode) write(stub *shim.ChaincodeStub, args []string ) ([]byte, error) {
+
+	var key, value string
+	var err error
+
+	fmt.Println("running write()")
+
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2. name of key and value to set")
+	}
+
+	key = args[0]
+	value = args[1]
+
+	err = stub.PutState(key, []byte(value))
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
